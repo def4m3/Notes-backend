@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Notes.Application.Notes.Queries.GetNoteList;
+using System.Security.Claims;
 
 namespace Notes.WebApi.Pages
 {
@@ -12,7 +15,7 @@ namespace Notes.WebApi.Pages
             _logger = logger;
         }
 
-        public void OnGet()
+        public async void OnGet()
         {
 
         }

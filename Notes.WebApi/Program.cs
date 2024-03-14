@@ -5,6 +5,7 @@ using Notes.Persistence;
 using Notes.Application.Common.Mappings;
 using Notes.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Notes.WebApi.Middleware;
 
 internal class Program
 {
@@ -51,27 +52,31 @@ internal class Program
 
         }
 
+        app.UseCustomExceptionHandler();
+
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
-            app.UseExceptionHandler("/Error");
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
 
         app.UseHttpsRedirection();
+
         app.UseStaticFiles();
 
         app.UseRouting();
+
+        app.UseCors("AllowAll");
+
+        app.UseAuthentication();
+
         app.UseAuthorization();
+
         app.UseEndpoints(cfg =>
         {
             cfg.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
         });
-
-        app.UseCors("AllowAll");
-
-
 
         app.MapRazorPages();
 

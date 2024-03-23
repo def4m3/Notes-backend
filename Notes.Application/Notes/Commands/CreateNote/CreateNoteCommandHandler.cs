@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Notes.Application.Notes.Commands.CreateNote
 {
-    internal class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand, Guid>
+    public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand, Guid>
     {
         private readonly INotesDbContext _context;
 

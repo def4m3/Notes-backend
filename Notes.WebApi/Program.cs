@@ -7,6 +7,10 @@ using Notes.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Notes.WebApi.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.Extensions.Options;
+using Notes.WebApi;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 internal class Program
 {
@@ -19,7 +23,26 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+
         builder.Services.AddRazorPages();
+
+        builder.Services.AddApiVersioning(opt =>
+        {
+            opt.ReportApiVersions = true;
+        }).AddVersionedApiExplorer(opt =>
+        {
+            opt.GroupNameFormat = "'v'VVV";
+            opt.SubstituteApiVersionInUrl = true;
+        });
+
+        builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>,ConfigureSwaggerOptions>();
+
+        builder.Services.AddSwaggerGen(cfg =>
+        {
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            cfg.IncludeXmlComments(xmlPath);
+        });
 
         builder.Services.AddAutoMapper(cfg =>
         {
@@ -51,7 +74,11 @@ internal class Program
                 opt.RequireHttpsMetadata = false;
             });
 
+        
+
         var app = builder.Build();
+
+        var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
         using (var scope = app.Services.CreateScope())
         {
@@ -64,6 +91,16 @@ internal class Program
             catch (Exception ex) { Console.WriteLine(ex.Message); }
 
         }
+
+        app.UseSwagger();
+        app.UseSwaggerUI(config =>
+        {
+            foreach(var description in provider.ApiVersionDescriptions)
+            {
+                config.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+                config.RoutePrefix = string.Empty;
+            }
+        });
 
         app.UseCustomExceptionHandler();
 
